@@ -34,6 +34,8 @@ impl Map {
                 tiles[idx] = TileType::Wall
             }
         }
+        tiles[0] = TileType::Floor;
+        tiles[NUM_TILES - 1] = TileType::Floor;
 
         Map { tiles }
     }
