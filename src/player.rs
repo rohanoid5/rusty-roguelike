@@ -1,5 +1,5 @@
 use bracket_lib::{
-    color::{BLACK, GREEN, WHITE},
+    color::{BLACK, WHITE},
     terminal::{to_cp437, BTerm, Point, VirtualKeyCode},
 };
 
