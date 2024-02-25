@@ -1,10 +1,9 @@
 use bracket_lib::{
-    color::{BLACK, RED4, YELLOW},
-    random::RandomNumberGenerator,
-    terminal::{to_cp437, BTerm},
+    color::{BLACK, WHITE},
+    terminal::{to_cp437, BTerm, Point},
 };
 
-use crate::{NUM_TILES, SCREEN_HEIGHT, SCREEN_WIDTH};
+use crate::{Camera, NUM_TILES, SCREEN_HEIGHT, SCREEN_WIDTH};
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum TileType {
@@ -22,34 +21,54 @@ pub struct Map {
 
 impl Map {
     pub fn new() -> Self {
-        let mut tiles = vec![TileType::Floor; NUM_TILES];
-
-        for idx in 0..NUM_TILES {
-            let mut random = RandomNumberGenerator::new();
-            let flag = random.range(0, 2);
-
-            if flag == 0 {
-                tiles[idx] = TileType::Floor
-            } else {
-                tiles[idx] = TileType::Wall
-            }
-        }
-        tiles[0] = TileType::Floor;
-        tiles[NUM_TILES - 1] = TileType::Floor;
-
+        let tiles = vec![TileType::Floor; NUM_TILES];
         Map { tiles }
     }
 
-    pub fn render(&mut self, ctx: &mut BTerm) {
-        for x in 0..SCREEN_WIDTH {
-            for y in 0..SCREEN_HEIGHT {
-                let idx = map_idx(x, y);
-
-                match self.tiles[idx] {
-                    TileType::Floor => ctx.set(x, y, YELLOW, BLACK, to_cp437('.')),
-                    TileType::Wall => ctx.set(x, y, RED4, BLACK, to_cp437('#')),
+    pub fn render(&mut self, ctx: &mut BTerm, camera: &Camera) {
+        ctx.set_active_console(0);
+        for y in camera.top_y..camera.bottom_y {
+            for x in camera.left_x..camera.right_x {
+                if self.in_bounds(Point::new(x, y)) {
+                    let idx = map_idx(x, y);
+                    match self.tiles[idx] {
+                        TileType::Floor => {
+                            ctx.set(
+                                x - camera.left_x,
+                                y - camera.top_y,
+                                WHITE,
+                                BLACK,
+                                to_cp437('.'),
+                            );
+                        }
+                        TileType::Wall => {
+                            ctx.set(
+                                x - camera.left_x,
+                                y - camera.top_y,
+                                WHITE,
+                                BLACK,
+                                to_cp437('#'),
+                            );
+                        }
+                    }
                 }
             }
+        }
+    }
+
+    pub fn in_bounds(&self, point: Point) -> bool {
+        point.x >= 0 && point.x < SCREEN_WIDTH && point.y >= 0 && point.y < SCREEN_HEIGHT
+    }
+
+    pub fn can_enter_tile(&self, point: Point) -> bool {
+        self.in_bounds(point) && self.tiles[map_idx(point.x, point.y)] == TileType::Floor
+    }
+
+    pub fn try_idx(&self, point: Point) -> Option<usize> {
+        if self.in_bounds(point) {
+            Some(map_idx(point.x, point.y))
+        } else {
+            None
         }
     }
 }

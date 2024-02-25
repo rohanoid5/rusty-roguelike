@@ -1,16 +1,24 @@
-use crate::{Map, Player};
-use bracket_lib::terminal::{BTerm, GameState, VirtualKeyCode};
+use crate::{Camera, Map, MapBuilder, Player};
+use bracket_lib::{
+    random::RandomNumberGenerator,
+    terminal::{BTerm, GameState},
+};
 
 pub struct State {
     map: Map,
     player: Player,
+    camera: Camera,
 }
 
 impl State {
     pub fn new() -> Self {
+        let mut range = RandomNumberGenerator::new();
+        let map_builder = MapBuilder::new(&mut range);
+
         State {
-            map: Map::new(),
-            player: Player::new(),
+            map: map_builder.map,
+            player: Player::new(map_builder.player_start),
+            camera: Camera::new(map_builder.player_start),
         }
     }
 }
@@ -18,18 +26,8 @@ impl State {
 impl GameState for State {
     fn tick(&mut self, ctx: &mut BTerm) {
         ctx.cls();
-        self.map.render(ctx);
-
-        if let Some(key) = ctx.key {
-            match key {
-                VirtualKeyCode::Up => self.player.move_up(),
-                VirtualKeyCode::Down => self.player.move_down(),
-                VirtualKeyCode::Left => self.player.move_left(),
-                VirtualKeyCode::Right => self.player.move_right(),
-                _ => {}
-            }
-        }
-
-        self.player.render(ctx);
+        self.player.update(ctx, &self.map, &mut self.camera);
+        self.map.render(ctx, &self.camera);
+        self.player.render(ctx, &self.camera);
     }
 }
