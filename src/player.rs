@@ -25,7 +25,7 @@ impl Player {
         );
     }
 
-    pub fn update(&mut self, ctx: &mut BTerm, map: &Map, camera: &mut Camera) {
+    pub fn update(&mut self, ctx: &mut BTerm, map: &Map, camera: &mut Camera, score: &mut usize) {
         if let Some(key) = ctx.key {
             let delta = match key {
                 VirtualKeyCode::Up => Point::new(0, -1),
@@ -39,6 +39,7 @@ impl Player {
             if map.can_enter_tile(new_position) {
                 self.position = new_position;
                 camera.on_player_move(new_position);
+                *score += 1;
             }
         }
     }
