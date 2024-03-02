@@ -1,9 +1,6 @@
-use bracket_lib::{
-    color::{BLACK, WHITE},
-    terminal::{to_cp437, BTerm, Point},
-};
+use bracket_lib::terminal::Point;
 
-use crate::{Camera, NUM_TILES, SCREEN_HEIGHT, SCREEN_WIDTH};
+use crate::{NUM_TILES, SCREEN_HEIGHT, SCREEN_WIDTH};
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum TileType {
@@ -23,37 +20,6 @@ impl Map {
     pub fn new() -> Self {
         let tiles = vec![TileType::Floor; NUM_TILES];
         Map { tiles }
-    }
-
-    pub fn render(&mut self, ctx: &mut BTerm, camera: &Camera) {
-        ctx.set_active_console(0);
-        for y in camera.top_y..camera.bottom_y {
-            for x in camera.left_x..camera.right_x {
-                if self.in_bounds(Point::new(x, y)) {
-                    let idx = map_idx(x, y);
-                    match self.tiles[idx] {
-                        TileType::Floor => {
-                            ctx.set(
-                                x - camera.left_x,
-                                y - camera.top_y,
-                                WHITE,
-                                BLACK,
-                                to_cp437('.'),
-                            );
-                        }
-                        TileType::Wall => {
-                            ctx.set(
-                                x - camera.left_x,
-                                y - camera.top_y,
-                                WHITE,
-                                BLACK,
-                                to_cp437('#'),
-                            );
-                        }
-                    }
-                }
-            }
-        }
     }
 
     pub fn in_bounds(&self, point: Point) -> bool {
