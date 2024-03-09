@@ -5,7 +5,7 @@ use bracket_lib::{
 };
 use legion::World;
 
-use crate::{Enemy, Player, Render};
+use crate::{Enemy, MoveRandomly, Player, Render};
 
 pub fn spawn_player(ecs: &mut World, position: Point) {
     ecs.push((
@@ -31,5 +31,6 @@ pub fn spawn_monster(ecs: &mut World, range: &mut RandomNumberGenerator, positio
                 _ => to_cp437('g'),
             },
         },
+        MoveRandomly {},
     ));
 }
